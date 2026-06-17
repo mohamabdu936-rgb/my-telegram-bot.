@@ -1,5 +1,34 @@
-module my-telegram-bot
+package main
 
-go 1.21
+import (
+	"log"
+	"os"
+	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
+)
 
-require github.com/go-telegram-bot-api/telegram-bot-api/v5 v5.5.1
+func main() {
+	token := os.Getenv("BOT_TOKEN")
+	if token == "" {
+		log.Fatal("BOT_TOKEN is not set")
+	}
+
+	bot, err := tgbotapi.NewBotAPI(token)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	bot.Debug = true
+	log.Printf("Authorized on account %s", bot.Self.UserName)
+
+	u := tgbotapi.NewUpdate(0)
+	u.Timeout = 60
+
+	updates := bot.GetUpdatesChan(u)
+
+	for update := range updates {
+		if update.Message != nil {
+			msg := tgbotapi.NewMessage(update.Message.Chat.ID, "مرحباً! أنا بوت يعمل على Render 🚀")
+			bot.Send(msg)
+		}
+	}
+}
